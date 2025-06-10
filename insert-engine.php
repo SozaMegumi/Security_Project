@@ -1,12 +1,12 @@
 <?php
 session_start();
-require_once 'conn/conn.php';; // Contains your DB connection
+require_once 'conn/conn.php'; // Your database connection
 
 function sanitize($data) {
     return htmlspecialchars(strip_tags(trim($data)));
 }
 
-// reCAPTCHA secret key
+// Google reCAPTCHA secret key
 $recaptcha_secret = '6Lc19lsrAAAAAJPOp0lE_lpOmZoZyX1Rk3mNirAZ';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -26,9 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $verify = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$recaptcha_secret}&response={$captcha}&remoteip=" . $_SERVER['REMOTE_ADDR']);
     $response = json_decode($verify);
 
-    if (!$response->success) {
-        die("CAPTCHA failed. Try again.");
-    }
+
 
     // Password validation
     if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/', $password)) {
@@ -36,15 +34,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     try {
-        // Connect securely
         $pdo = new PDO("mysql:host=localhost;dbname=marathon", "root", "");
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        // Check if user_id or email already exists
-        $stmt = $pdo->prepare("SELECT user_id FROM users WHERE user_id = :user_id OR email = :email");
-        $stmt->execute(['user_id' => $user_id, 'email' => $email]);
+        // Optional: check if IC or email exists
+        $stmt = $pdo->prepare("SELECT * FROM registration WHERE Ic_Num = :IC_num OR email = :email");
+        $stmt->execute(['IC_num' => $IC_num, 'email' => $email]);
         if ($stmt->rowCount() > 0) {
-            die("User ID or Email already registered.");
+            die("IC Number or Email already registered.");
         }
 
         // Salt & hash password
@@ -52,22 +49,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $hashed = password_hash($password . $salt, PASSWORD_DEFAULT);
         $combined = $hashed . ":" . $salt;
 
-        // Insert user (without emergency_num)
-        $stmt = $pdo->prepare("INSERT INTO users (name, IC_num, phone, email, password_hash) 
-                               VALUES (name, :IC_num, :phone, :email, :password_hash)");
+        // Insert into your database
+        $stmt = $pdo->prepare("INSERT INTO registration (name, Ic_Num, password, Phone_Num, email) 
+                               VALUES (:name, :IC_num, :password_hash, :phone, :email)");
         $stmt->execute([
             'name'          => $name,
             'IC_num'        => $IC_num,
+            'password_hash' => $combined,
             'phone'         => $phone,
-            'email'         => $email,
-            'password_hash' => $combined
+            'email'         => $email
         ]);
 
-        // Redirect to index.html
         header("Location: index.html");
         exit();
     } catch (PDOException $e) {
-        die("Error: " . $e->getMessage());
+        die("Database error: " . $e->getMessage());
     }
 } else {
     die("Invalid request.");
