@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db.php'; // Make sure this connects using PDO
+require_once 'conn/conn.php'; // Make sure this connects using PDO
 
 function sanitize($data) {
     return htmlspecialchars(strip_tags(trim($data)));
