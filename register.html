@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -16,19 +17,24 @@
             margin: 4px 0;
             font-size: 14px;
         }
-        .valid { color: green; }
-        .invalid { color: red; }
+
+        .valid {
+            color: green;
+        }
+
+        .invalid {
+            color: red;
+        }
     </style>
 </head>
+
 <body>
     <div class="container-4">
         <div class="cont-child">
             <div class="rightCont">
                 <h1>Registration Form</h1>
                 <hr>
-                <form id="signup-form" action="signup-engine.php" method="POST">
-                    <label class="label" for="user_id">User ID</label>
-                    <input type="text" name="user_id" placeholder="User ID" required>
+                <form id="signup-form" action="signin-engine.php" method="POST">
 
                     <label class="label" for="name">Name</label>
                     <input type="text" name="name" placeholder="Name" required>
@@ -67,7 +73,7 @@
                 <a href="index.html"><img src="Image/logo-white.png"></a>
                 <h1>Already registered?</h1>
                 <p>Log in to view or update your details</p>
-                <a class="button" href="signIn.html">Login</a>
+                <a class="button" href="signin.html">Login</a>
             </div>
         </div>
     </div>
@@ -90,4 +96,5 @@
         };
     </script>
 </body>
+
 </html>
