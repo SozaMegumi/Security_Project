@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="Image/icon.ico" />
+    <link rel="stylesheet" type="text/css" href="css/style.css" />
+    <title>KLMarathon - Register</title>
+
+    <!-- Load Google reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+    <style>
+        .password-msg p {
+            margin: 4px 0;
+            font-size: 14px;
+        }
+        .valid { color: green; }
+        .invalid { color: red; }
+    </style>
+</head>
+<body>
+    <div class="container-4">
+        <div class="cont-child">
+            <div class="rightCont">
+                <h1>Registration Form</h1>
+                <hr>
+                <form id="signup-form" action="signup-engine.php" method="POST">
+                    <label class="label" for="user_id">User ID</label>
+                    <input type="text" name="user_id" placeholder="User ID" required>
+
+                    <label class="label" for="name">Name</label>
+                    <input type="text" name="name" placeholder="Name" required>
+
+                    <label class="label" for="IC_num">IC Number</label>
+                    <input type="text" name="IC_num" placeholder="IC number" required>
+
+                    <label class="label" for="phone">Phone Number</label>
+                    <input type="tel" name="phone" placeholder="012-3456789" required>
+
+                    <label class="label" for="email">Email</label>
+                    <input type="email" name="email" placeholder="Email" required>
+
+                    <label class="label" for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Password" required
+                        pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}"
+                        title="Min 8 chars, with upper, lower, number & special char">
+
+                    <div id="message" class="password-msg">
+                        <p id="letter" class="invalid">• A <b>lowercase</b> letter</p>
+                        <p id="capital" class="invalid">• A <b>capital (uppercase)</b> letter</p>
+                        <p id="number" class="invalid">• A <b>number</b></p>
+                        <p id="special" class="invalid">• A <b>special character</b> (@$!%*?&)</p>
+                        <p id="length" class="invalid">• Minimum <b>8 characters</b></p>
+                    </div>
+
+                    <!-- Google reCAPTCHA widget -->
+                    <div class="g-recaptcha" data-sitekey="6LcbBlwrAAAAADszQ8QkAg8TMUArDnsiP71nFxm5"></div>
+
+                    <input type="submit" class="submit" value="Register">
+                </form>
+            </div>
+        </div>
+        <div class="cont-child">
+            <div class="leftCont">
+                <a href="index.html"><img src="Image/logo-white.png"></a>
+                <h1>Already registered?</h1>
+                <p>Log in to view or update your details</p>
+                <a class="button" href="signIn.html">Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const password = document.getElementById("password");
+        const letter = document.getElementById("letter");
+        const capital = document.getElementById("capital");
+        const number = document.getElementById("number");
+        const special = document.getElementById("special");
+        const length = document.getElementById("length");
+
+        password.onkeyup = function () {
+            const val = password.value;
+            letter.className = /[a-z]/.test(val) ? "valid" : "invalid";
+            capital.className = /[A-Z]/.test(val) ? "valid" : "invalid";
+            number.className = /\d/.test(val) ? "valid" : "invalid";
+            special.className = /[!@#$%^&*(),.?":{}|<>]/.test(val) ? "valid" : "invalid";
+            length.className = val.length >= 8 ? "valid" : "invalid";
+        };
+    </script>
+</body>
+</html>
