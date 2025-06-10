@@ -1,31 +1,56 @@
 <?php
 session_start();
-require_once 'conn/conn.php'; // Make sure this connects using PDO
+require_once 'conn/conn.php'; // Make sure this file properly initializes $pdo
 
 function sanitize($data) {
     return htmlspecialchars(strip_tags(trim($data)));
 }
 
-// Google reCAPTCHA secret key
-$recaptcha_secret = "6LcbBlwrAAAAACR058H2xHxQahvLDkD6jQFhFQBg   ";
+// Google reCAPTCHA secret key (removed trailing whitespace)
+$recaptcha_secret = "6LcbBlwrAAAAACR058H2xHxQahvLDkD6jQFhFQBg";
 
 // Check reCAPTCHA
 if (!isset($_POST['g-recaptcha-response'])) {
-    echo "<script>alert('reCAPTCHA is required.'); window.location.href='signin.php';</script>";
+    $_SESSION['error'] = 'reCAPTCHA is required.';
+    header('Location: signin.php');
     exit();
 }
 
-$recaptcha_response = $_POST['g-recaptcha-response'];
-$response = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=$recaptcha_secret&response=$recaptcha_response");
+$recaptcha_response = sanitize($_POST['g-recaptcha-response']);
+
+// Verify reCAPTCHA
+$url = 'https://www.google.com/recaptcha/api/siteverify';
+$data = [
+    'secret' => $recaptcha_secret,
+    'response' => $recaptcha_response
+];
+
+$options = [
+    'http' => [
+        'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+        'method' => 'POST',
+        'content' => http_build_query($data)
+    ]
+];
+
+$context = stream_context_create($options);
+$response = file_get_contents($url, false, $context);
 $response_keys = json_decode($response, true);
 
 if (!$response_keys['success']) {
-    echo "<script>alert('reCAPTCHA failed. Try again.'); window.location.href='signin.php';</script>";
+    $_SESSION['error'] = 'reCAPTCHA verification failed.';
+    header('Location: signin.php');
     exit();
 }
 
 // Get user inputs
-$IC_num = sanitize($_POST["IC_num"]);
+if (!isset($_POST['Ic_num']) || !isset($_POST['email'])) {
+    $_SESSION['error'] = 'All fields are required.';
+    header('Location: signin.php');
+    exit();
+}
+
+$IC_num = sanitize($_POST["Ic_num"]);
 $email = sanitize($_POST["email"]);
 
 try {
@@ -49,10 +74,14 @@ try {
         header("Location: details.php?user_id=" . urlencode($user['user_id']));
         exit();
     } else {
-        echo "<script>alert('Invalid credentials!'); window.location.href='signin.php';</script>";
+        $_SESSION['error'] = 'Invalid credentials!';
+        header('Location: signin.php');
     }
 
 } catch (PDOException $e) {
-    echo "Database error: " . $e->getMessage();
+    error_log("Database error: " . $e->getMessage());
+    $_SESSION['error'] = 'A system error occurred. Please try again.';
+    header('Location: signin.php');
+    exit();
 }
 ?>
