@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'db.php'; // Contains your DB connection
+require_once 'conn/conn.php';; // Contains your DB connection
 
 function sanitize($data) {
     return htmlspecialchars(strip_tags(trim($data)));
@@ -11,7 +11,6 @@ $recaptcha_secret = '6Lc19lsrAAAAAJPOp0lE_lpOmZoZyX1Rk3mNirAZ';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Sanitize inputs
-    $user_id  = sanitize($_POST['user_id']);
     $name     = sanitize($_POST['name']);
     $IC_num   = sanitize($_POST['IC_num']);
     $phone    = sanitize($_POST['phone']);
@@ -54,10 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $combined = $hashed . ":" . $salt;
 
         // Insert user (without emergency_num)
-        $stmt = $pdo->prepare("INSERT INTO users (user_id, name, IC_num, phone, email, password_hash) 
-                               VALUES (:user_id, :name, :IC_num, :phone, :email, :password_hash)");
+        $stmt = $pdo->prepare("INSERT INTO users (name, IC_num, phone, email, password_hash) 
+                               VALUES (name, :IC_num, :phone, :email, :password_hash)");
         $stmt->execute([
-            'user_id'       => $user_id,
             'name'          => $name,
             'IC_num'        => $IC_num,
             'phone'         => $phone,
