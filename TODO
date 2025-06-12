@@ -1,0 +1,17 @@
+Task 1: Registration
+- Register user (userID, name, password, id number, and email) - done
+- Sanitize - done
+- Block staff/customer that enrolled from 2020 aboved (detect by idnumber)
+- password requirement (uppercase, lowercase, numerals, special char, 8 char) - done
+- display error message (password, matric number, and email)
+
+Task 2: Authentication
+- Use salt with password stored in db - done
+- Apply MFA - done
+
+Task 3: Additional security Implementation
+- parameterized query on any SQL satement
+- display 2 session management (at least 2 pages) - done
+- Implement SSL
+
+done 6/10 = 60%
