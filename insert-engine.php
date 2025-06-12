@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'conn/conn.php'; // Your database connection
+require_once 'conn/conn.php';
 
 function sanitize($data) {
     return htmlspecialchars(strip_tags(trim($data)));
@@ -9,11 +9,10 @@ function sanitize($data) {
 // Google reCAPTCHA secret key
 $recaptcha_secret = '6Lc19lsrAAAAAJPOp0lE_lpOmZoZyX1Rk3mNirAZ';
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Sanitize inputs
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name     = sanitize($_POST['name']);
-    $IC_num   = sanitize($_POST['IC_num']);
-    $phone    = sanitize($_POST['phone']);
+    $IC_Num   = sanitize($_POST['Ic_Num']);
+    $Phone_Num   = sanitize($_POST['Phone_Num']);
     $email    = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
     $password = $_POST['password'];
     $captcha  = $_POST['g-recaptcha-response'];
@@ -23,48 +22,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         die("Please complete the CAPTCHA.");
     }
 
-    $verify = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret={$recaptcha_secret}&response={$captcha}&remoteip=" . $_SERVER['REMOTE_ADDR']);
+    $verify = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=$recaptcha_secret&response=$captcha&remoteip=" . $_SERVER['REMOTE_ADDR']);
     $response = json_decode($verify);
-
-
+    
 
     // Password validation
     if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/', $password)) {
-        die("Password must include uppercase, lowercase, number, special character and be at least 8 characters.");
+        die("Password must contain uppercase, lowercase, number, special char and min 8 characters.");
     }
 
     try {
-        $pdo = new PDO("mysql:host=localhost;dbname=marathon", "root", "");
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        // Optional: check if IC or email exists
-        $stmt = $pdo->prepare("SELECT * FROM registration WHERE Ic_Num = :IC_num OR email = :email");
-        $stmt->execute(['IC_num' => $IC_num, 'email' => $email]);
-        if ($stmt->rowCount() > 0) {
-            die("IC Number or Email already registered.");
+        $stmt = $conn->prepare("SELECT * FROM registration WHERE Ic_Num = ? OR email = ?");
+        $stmt->bind_param("ss", $Ic_Num, $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            die("IC number or email already registered.");
         }
 
-        // Salt & hash password
-        $salt = bin2hex(random_bytes(8));
-        $hashed = password_hash($password . $salt, PASSWORD_DEFAULT);
-        $combined = $hashed . ":" . $salt;
+        $hashed = password_hash($password, PASSWORD_DEFAULT);
 
-        // Insert into your database
-        $stmt = $pdo->prepare("INSERT INTO registration (name, Ic_Num, password, Phone_Num, email) 
-                               VALUES (:name, :IC_num, :password_hash, :phone, :email)");
-        $stmt->execute([
-            'name'          => $name,
-            'IC_num'        => $IC_num,
-            'password_hash' => $combined,
-            'phone'         => $phone,
-            'email'         => $email
-        ]);
+        $stmt = $conn->prepare("INSERT INTO registration (name, Ic_Num, password, Phone_Num, email) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssss", $name, $IC_Num, $hashed, $Phone_Num, $email);
+        $stmt->execute();
 
-        header("Location: index.html");
+        // Redirect to sign in page after successful registration
+        header("Location: signin.html");
         exit();
-    } catch (PDOException $e) {
+    } catch (Exception $e) {
         die("Database error: " . $e->getMessage());
     }
 } else {
     die("Invalid request.");
 }
+?>

@@ -3,7 +3,7 @@ Task 1: Registration
 - Sanitize - done
 - Block staff/customer that enrolled from 2020 aboved (detect by idnumber)
 - password requirement (uppercase, lowercase, numerals, special char, 8 char) - done
-- display error message (password, matric number, and email)
+- display error message (password, matric number, and email) - 
 
 Task 2: Authentication
 - Use salt with password stored in db - done

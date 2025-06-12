@@ -1,16 +1,31 @@
-<!-- signin.php -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="Image/icon.ico" />
   <link rel="stylesheet" href="css/style.css" />
   <title>KLMarathon - Sign In</title>
-
-  <!-- reCAPTCHA -->
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
+  <!-- Show error messages -->
+  <script>
+    window.onload = function () {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('error')) {
+        const code = params.get('error');
+        let msg = '';
+        switch (code) {
+          case '1': msg = "Incorrect IC number, email, or password."; break;
+          case '2': msg = "CAPTCHA verification failed."; break;
+          case '3': msg = "All fields are required."; break;
+          case '4': msg = "CAPTCHA is required."; break;
+          default: msg = "An unknown error occurred.";
+        }
+        alert(msg);
+      }
+    };
+  </script>
 </head>
 <body>
   <div class="container-4">
@@ -18,7 +33,7 @@
       <div class="leftCont">
         <a href="index.html"><img src="Image/logo-white.png" alt="Logo" /></a>
         <h1>New Here?</h1>
-        <p>Register for the marathon and<br> start your race with us now</p>
+        <p>Register for the marathon and<br>start your race with us now</p>
         <a class="button" href="register.html">Register</a>
       </div>
     </div>
@@ -29,13 +44,15 @@
         <p>Sign in with the credentials you registered with</p>
 
         <form action="signin-engine.php" method="POST">
-          <label class="label" for="IC_num">IC Number</label>
-          <input type="text" name="IC_num" placeholder="IC number" required />
+          <label class="label" for="Ic_Num">IC Number</label>
+          <input type="text" name="Ic_Num" placeholder="IC number" required />
 
           <label class="label" for="email">Email</label>
           <input type="email" name="email" placeholder="Email" required />
 
-          <!-- Google reCAPTCHA -->
+          <label class="label" for="password">Password</label>
+          <input type="password" name="password" placeholder="Password" required />
+
           <div class="g-recaptcha" data-sitekey="6LcbBlwrAAAAADszQ8QkAg8TMUArDnsiP71nFxm5"></div>
 
           <input type="submit" class="submit" value="Sign In" />
